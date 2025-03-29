@@ -1,0 +1,79 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Model files and checkpoints
+*.h5
+*.hdf5
+*.pb
+*.pth
+*.pt
+*.onnx
+*.tflite
+best_model.h5
+dermatological_diagnosis_model.h5
+synthetic_model.h5
+
+# Dataset files - exclude the whole dataset directory
+dataset/
+dataset
+
+# Data preprocessing outputs
+*.npy
+*.npz
+*.pkl
+
+# Visualization outputs
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.svg
+lime_explanation.png
+training_history.png
+confusion_matrix.png
+roc_curve.png
+
+# Log files
+logs/
+*.log
+classification_report.txt
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+Thumbs.db
+.directory
+
+# Temporary files
+tmp/
+temp/
+
+# Large files (GitHub has a file size limit)
+*.zip
+*.tar.gz
+*.tar
+
+# TensorFlow specific
+tensorboard_logs/
+.tf_logs/
+```
