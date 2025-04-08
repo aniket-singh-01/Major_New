@@ -28,6 +28,17 @@ best_model.h5
 dermatological_diagnosis_model.h5
 synthetic_model.h5
 
+# Large model files - exclude to avoid GitHub's file size limit
+*.keras
+optimized_model.*
+*_model.h5
+*_model.keras
+continued_model.*
+simple_model.*
+emergency_model.*
+saved_model/
+simple_model_saved/
+
 # Dataset files - exclude the whole dataset directory
 dataset/
 dataset
@@ -76,4 +87,3 @@ temp/
 # TensorFlow specific
 tensorboard_logs/
 .tf_logs/
-```
