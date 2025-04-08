@@ -1,0 +1,27 @@
+True Class,Predicted Class,Count
+mel,nv,41
+bkl,nv,20
+mel,bkl,12
+nv,mel,9
+nv,bkl,8
+bcc,nv,8
+bcc,bkl,8
+bkl,mel,6
+vasc,nv,6
+mel,akiec,4
+akiec,mel,4
+akiec,bkl,4
+akiec,nv,3
+mel,bcc,3
+akiec,bcc,3
+nv,bcc,3
+df,nv,2
+df,bcc,2
+bcc,akiec,1
+bcc,df,1
+bcc,mel,1
+bkl,df,1
+bkl,bcc,1
+nv,akiec,1
+mel,df,1
+bkl,vasc,1

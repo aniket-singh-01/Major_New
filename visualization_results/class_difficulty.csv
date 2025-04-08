@@ -1,0 +1,8 @@
+Class,Description,Accuracy,Avg Confidence,Correct Confidence,Incorrect Confidence,Risk Level
+akiec,Actinic Keratosis & Intraepithelial Carcinoma,0.4666666666666667,0.580015,0.6738652,0.4978962,High
+bcc,Basal Cell Carcinoma,0.3333333333333333,0.60507256,0.6792373,0.5679902,Moderate
+bkl,Benign Keratosis,0.4,0.67669356,0.63139623,0.7068919,Low
+df,Dermatofibroma,0.23529411764705882,0.7499051,0.8293951,0.7254466,Low
+mel,Melanoma,0.3,0.70679873,0.7211826,0.70063424,High
+nv,Melanocytic Nevus,0.8333333333333334,0.88888353,0.96833146,0.49164408,Low
+vasc,Vascular Lesion,0.5,0.75984854,0.76772285,0.7519743,Low

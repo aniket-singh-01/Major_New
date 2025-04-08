@@ -520,6 +520,16 @@ def load_from_class_directories(train_dir, valid_dir, img_size=(299, 299)):
         X_val, X_test, val_labels, test_labels = train_test_split(
             X_val, val_labels, test_size=0.5, random_state=42, stratify=val_labels)
     
+    # Fix the error: convert lists to numpy arrays if they aren't already
+    if isinstance(X_train, list):
+        X_train = np.array(X_train)
+    if isinstance(X_val, list):
+        X_val = np.array(X_val)
+    if isinstance(X_test, list):
+        X_test = np.array(X_test)
+    
+    print(f"Dataset loaded successfully: {len(X_train)} training, {len(X_val)} validation, {len(X_test)} test images")
+    
     # Convert labels to one-hot encoding
     n_classes = len(class_names)
     y_train = to_categorical(train_labels, num_classes=n_classes)

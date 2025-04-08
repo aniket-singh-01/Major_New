@@ -1,0 +1,8 @@
+Class,Description,Samples,Accuracy,F1-Score,Precision,Recall
+akiec,Actinic Keratosis & Intraepithelial Carcinoma,30,0.4667,0.5714,0.7368,0.4667
+bcc,Basal Cell Carcinoma,30,0.3333,0.4000,0.5000,0.3333
+bkl,Benign Keratosis,30,0.4000,0.3429,0.3000,0.4000
+df,Dermatofibroma,17,0.2353,0.3810,1.0000,0.2353
+mel,Melanoma,30,0.3000,0.3673,0.4737,0.3000
+nv,Melanocytic Nevus,30,0.8333,0.4717,0.3289,0.8333
+vasc,Vascular Lesion,22,0.5000,0.6667,1.0000,0.5000

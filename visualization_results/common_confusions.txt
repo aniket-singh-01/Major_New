@@ -1,0 +1,11 @@
+Most common confusions:
+bkl -> nv: 13 instances
+bcc -> bkl: 10 instances
+mel -> nv: 10 instances
+vasc -> nv: 10 instances
+akiec -> bkl: 8 instances
+df -> nv: 7 instances
+bcc -> nv: 6 instances
+akiec -> nv: 5 instances
+mel -> bkl: 5 instances
+bcc -> mel: 3 instances

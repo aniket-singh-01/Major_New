@@ -1,8 +1,44 @@
 import tensorflow as tf
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
+from tensorflow.keras.models import Model, Sequential
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout, Input
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+
+def create_model(input_shape, num_classes):
+    """
+    Create a Sequential model for classification
+    
+    Args:
+        input_shape: Shape of the input data
+        num_classes: Number of classes to predict
+        
+    Returns:
+        The compiled model
+    """
+    # Create a Sequential model
+    model = Sequential([
+        # Don't use InputLayer directly, use input_shape in the first layer
+        Dense(256, activation='relu', input_shape=input_shape),
+        Dropout(0.3),
+        Dense(128, activation='relu'),
+        Dropout(0.2),
+        Dense(64, activation='relu'),
+        Dense(num_classes, activation='softmax')
+    ])
+    
+    # Compile the model
+    model.compile(
+        optimizer=Adam(learning_rate=1e-4),
+        loss='categorical_crossentropy',
+        metrics=[
+            'accuracy',
+            tf.keras.metrics.AUC(),
+            tf.keras.metrics.Precision(),
+            tf.keras.metrics.Recall()
+        ]
+    )
+    
+    return model
 
 def build_model(base_model, num_classes):
     """
@@ -80,26 +116,6 @@ def train_model(model, X_train, y_train, X_val, y_val, epochs=20, batch_size=32)
         X_train, y_train,
         batch_size=batch_size,
         epochs=epochs,
-        validation_data=(X_val, y_val),
-        callbacks=[early_stopping, reduce_lr, checkpoint]
-    )
-    
-    # Fine-tune the model: unfreeze some Inception V3 layers
-    for layer in model.layers[0].layers[-30:]:
-        layer.trainable = True
-    
-    # Recompile with a lower learning rate
-    model.compile(
-        optimizer=Adam(learning_rate=1e-5),
-        loss='categorical_crossentropy',
-        metrics=['accuracy', tf.keras.metrics.AUC(), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
-    )
-    
-    # Continue training with fine-tuning
-    fine_tune_history = model.fit(
-        X_train, y_train,
-        batch_size=batch_size,
-        epochs=10,
         validation_data=(X_val, y_val),
         callbacks=[early_stopping, reduce_lr, checkpoint]
     )

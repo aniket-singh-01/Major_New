@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout, Input
 import random
+from tf_utils import suppress_tf_warnings
 
 class GreyWolfOptimizer:
     def __init__(self, model, X_train, y_train, X_val, y_val, 
@@ -18,6 +19,9 @@ class GreyWolfOptimizer:
             max_iter: Maximum iterations for optimization
             feature_layer_index: Index of the layer to extract features from
         """
+        # Suppress TensorFlow warnings
+        suppress_tf_warnings()
+        
         self.model = model
         self.X_train = X_train
         self.y_train = y_train
@@ -34,12 +38,35 @@ class GreyWolfOptimizer:
         )
         
         # Get the extracted features
+        print("Extracting features from the model...")
         self.train_features = self.feature_extractor.predict(X_train)
         self.val_features = self.feature_extractor.predict(X_val)
         
         # Determine the number of features
         self.num_features = self.train_features.shape[1]
         
+    def calculate_fitness(self, wolf_position):
+        """
+        Calculate fitness for a wolf position (feature subset)
+        
+        Note: The fitness is negative because we want to maximize accuracy,
+        but the optimization algorithm is designed to minimize the objective function.
+        Lower (more negative) values indicate better performance.
+        """
+        # Create mask of selected features
+        mask = wolf_position > 0.5
+        
+        # Skip if no features are selected
+        if not np.any(mask):
+            return 0  # Poor fitness if no features selected
+        
+        # Evaluate using the mask
+        score = self._evaluate_wolf(mask)
+        
+        # Return negative accuracy because GWO is minimizing the objective
+        # So minimizing -accuracy is equivalent to maximizing accuracy
+        return score
+    
     def optimize(self):
         """
         Run the Grey Wolf Optimization algorithm
@@ -66,25 +93,18 @@ class GreyWolfOptimizer:
         # Main loop
         for iteration in range(self.max_iter):
             for i in range(self.num_wolves):
-                # Create a mask with 1s where features are selected
-                mask = positions[i] > 0.5
-                
-                # Skip if no features are selected
-                if not np.any(mask):
-                    continue
-                
-                # Create a new model with selected features
-                score = self._evaluate_wolf(mask)
+                # Calculate fitness for this wolf
+                fitness = self.calculate_fitness(positions[i])
                 
                 # Update alpha, beta, and delta
-                if score < alpha_score:
-                    alpha_score = score
+                if fitness < alpha_score:
+                    alpha_score = fitness
                     alpha_pos = positions[i].copy()
-                elif score < beta_score:
-                    beta_score = score
+                elif fitness < beta_score:
+                    beta_score = fitness
                     beta_pos = positions[i].copy()
-                elif score < delta_score:
-                    delta_score = score
+                elif fitness < delta_score:
+                    delta_score = fitness
                     delta_pos = positions[i].copy()
             
             # Update the position of each wolf
@@ -120,7 +140,10 @@ class GreyWolfOptimizer:
                 # Binarize positions
                 positions[i] = np.where(positions[i] > 0.5, 1, 0)
             
-            print(f"Iteration {iteration+1}/{self.max_iter}, Best fitness: {alpha_score}")
+            # Display absolute accuracy value to avoid confusion
+            actual_accuracy = -alpha_score
+            print(f"Iteration {iteration+1}/{self.max_iter}, " 
+                  f"Best fitness: {alpha_score} (Accuracy: {actual_accuracy:.4f})")
         
         # Create final model using alpha (best) features
         print("Optimization complete. Creating final model with selected features.")
@@ -140,6 +163,7 @@ class GreyWolfOptimizer:
         # Create a simple model to evaluate this feature subset
         input_shape = (sum(feature_mask),)
         
+        # Use TensorFlow 2.x API style
         inputs = Input(shape=input_shape)
         x = Dense(128, activation='relu')(inputs)
         x = Dropout(0.3)(x)
@@ -152,9 +176,10 @@ class GreyWolfOptimizer:
         X_train_selected = self.train_features[:, feature_mask]
         X_val_selected = self.val_features[:, feature_mask]
         
+        # Use smaller epochs and batch size for faster evaluation
         model.fit(
             X_train_selected, self.y_train,
-            epochs=5,
+            epochs=3,  # Reduce from 5 to 3 for faster evaluation
             batch_size=32,
             validation_data=(X_val_selected, self.y_val),
             verbose=0
@@ -183,14 +208,18 @@ class GreyWolfOptimizer:
         selected_features = sum(feature_mask)
         print(f"Creating model with {selected_features} selected features out of {self.num_features}")
         
-        # Create the final model structure
+        # Use TensorFlow 2.x API style with no deprecated functions
+        # Create the final model structure using functional API
         inputs = self.model.input
         x = self.feature_extractor(inputs)
         
-        # Apply feature mask to keep only selected features
-        # This is a custom layer that multiplies the features by the mask
+        # Apply feature mask using a custom Lambda layer - modern approach in TF 2.x
+        feature_mask_tf = tf.constant(feature_mask.astype('float32'))
+        
+        # Add output_shape parameter to Lambda layer to fix the issue
         mask_layer = tf.keras.layers.Lambda(
-            lambda x: tf.multiply(x, tf.constant(feature_mask.astype('float32')))
+            lambda x: tf.multiply(x, feature_mask_tf),
+            output_shape=lambda input_shape: input_shape  # Explicitly define output shape
         )(x)
         
         # Continue with dense layers as in the original model
@@ -212,12 +241,34 @@ class GreyWolfOptimizer:
         # Train the optimized model
         optimized_model.fit(
             self.X_train, self.y_train,
-            epochs=15,
+            epochs=10,  # Reduced from 15 for faster training
             batch_size=32,
             validation_data=(self.X_val, self.y_val),
             callbacks=[
-                tf.keras.callbacks.EarlyStopping(patience=5, restore_best_weights=True)
-            ]
+                tf.keras.callbacks.EarlyStopping(patience=3, restore_best_weights=True)
+            ],
+            verbose=1
         )
+        
+        # Save the model in TFLite format as well for better compatibility
+        try:
+            # Convert the model to TFLite
+            converter = tf.lite.TFLiteConverter.from_keras_model(optimized_model)
+            tflite_model = converter.convert()
+            
+            # Save the TFLite model
+            with open('optimized_model.tflite', 'wb') as f:
+                f.write(tflite_model)
+            
+            print("Model also saved in TFLite format for better compatibility")
+        except Exception as e:
+            print(f"Could not save TFLite model: {e}")
+        
+        # Also save in saved_model format for maximum compatibility
+        try:
+            tf.saved_model.save(optimized_model, 'saved_model')
+            print("Model also saved in SavedModel format")
+        except Exception as e:
+            print(f"Could not save in SavedModel format: {e}")
         
         return optimized_model
