@@ -30,14 +30,21 @@ synthetic_model.h5
 
 # Large model files - exclude to avoid GitHub's file size limit
 *.keras
+*.h5
+*.hdf5
+*.pb
+*.tflite
+*.onnx
 optimized_model.*
-*_model.h5
-*_model.keras
+*_model.*
 continued_model.*
 simple_model.*
 emergency_model.*
+quick_derma_model.*
 saved_model/
 simple_model_saved/
+*_saved_model/
+model_checkpoints/
 
 # Dataset files - exclude the whole dataset directory
 dataset/
@@ -58,6 +65,15 @@ lime_explanation.png
 training_history.png
 confusion_matrix.png
 roc_curve.png
+*result*.png
+*result*.jpg
+*_result_*.png
+combined_result_*.png
+derma_result_*.png
+diagnosis_*.png
+explanation_*.png
+lime_explanation_*.png
+lime_explanation_result.png
 
 # Log files
 logs/
@@ -87,3 +103,19 @@ temp/
 # TensorFlow specific
 tensorboard_logs/
 .tf_logs/
+
+# Runtime files that don't need version control
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env
+
+# Generated data files
+batch_results.csv
+batch_test_results.csv
+*_statistics.csv
+misclassification_summary.csv
+class_metrics.csv
+class_difficulty.csv
